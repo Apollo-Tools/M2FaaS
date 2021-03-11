@@ -1,0 +1,22 @@
+{
+  "name": "m2faas",
+  "version": "1.0.0",
+  "description": "Monolith to FaaS",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Apollo-Tools/m2faas.git"
+  },
+  "author": "Stefan Pedratscher",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Apollo-Tools/m2faas/issues"
+  },
+  "homepage": "https://github.com/Apollo-Tools/m2faas#readme",
+  "dependencies": {
+    "esprima": "^4.0.1",
+    "prettier": "^2.0.5",
+    "webpack": "^4.0.0",
+    "tmp": "^0.2.1"
+  }
+}
