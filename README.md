@@ -1,1 +1,1 @@
-# m2faas
+# M2FaaS - Monolith to FaaS
