@@ -9,7 +9,7 @@ async function main(project) {
 
         // Parse source file
         var esprima = require('esprima');
-        var ast = esprima.parseScript(data, { comment: true, loc: true })
+        var ast = esprima.parseScript(data, { comment: true, loc: true, tolerant: true })
 
         // Detect code block
         var detector = require('./utils/detector')
@@ -37,11 +37,8 @@ async function main(project) {
 
             // Dependencies
             var webpackmanager = require('./utils/webpackmanager')
-            var wpack = await webpackmanager.bundle()
-            console.log(wpack)
-            fs.writeFileSync(
-              "out/bundle.js",
-            )
+            var wpack = webpackmanager.bundle()
+
 
         } else {
             console.log('Skipping file ' + project + ". Could not find annotation start or end")
