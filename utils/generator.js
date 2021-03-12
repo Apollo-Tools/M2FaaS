@@ -2,20 +2,18 @@ const prettier = require('prettier')
 
 
 module.exports = {
-    indexAWS: function(comments) {
+    indexAWS: function(requires, inputs, codeBlock, returnJson) {
         return prettier.format(`
+                ${requires}
 
-               module.exports.handler = async (event, context) => {
-
-                 const userFunc = module.exports;
-                 let res;
-                 try {
-                   res = await userFunc(event)
-                 } catch(e) {
-                   context.fail(e)
-                 }
-                 context.succeed(res)
-               }
+                exports.handler = async (event) => {
+                    ${inputs}
+                    ${codeBlock}
+                    return response = {
+                        statusCode: 200,
+                        body: ${returnJson},
+                    };
+                };
              `, { semi: false, parser: 'babel' }
             )
     }

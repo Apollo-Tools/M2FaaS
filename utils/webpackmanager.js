@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 
 module.exports = {
-  bundle: async function () {
+  bundle: async function (entry, filename) {
     let infilepath = tmp.fileSync({ postfix: '.js' });
     infilepath = infilepath.name
     let outfiledir = tmp.dirSync();
@@ -13,11 +13,11 @@ module.exports = {
            webpack(
              {
                mode: 'development', // don't scramble source
-               entry: './example/simpleFunction.js',
+               entry: entry,
                target: 'node',
                output: {
                  path: outfiledir,
-                 filename: 'bundle.js'
+                 filename: filename
                },
              }
              , (err, stats) => {
@@ -37,14 +37,14 @@ module.exports = {
                }
              });
          })
-    const bundlejssrc = fs.readFileSync(path.join(outfiledir, 'bundle.js'), { encoding: 'utf8' })
+    const bundlejssrc = fs.readFileSync(path.join(outfiledir, filename), { encoding: 'utf8' })
     const fcontent = `
         const a =
          ${ bundlejssrc}
         ;module.exports = a;
       `
     fs.writeFileSync(
-        "out/bundle.js",
+        "out/aws/"+filename,
         fcontent
       )
     return fcontent

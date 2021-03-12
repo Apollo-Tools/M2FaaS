@@ -13,10 +13,11 @@ function parseByOption(line, option) {
 module.exports = {
     readCodeBlock: function(optionsString) {
         var options = {
+            name: parseByOption(optionsString, "name")[0],
             require: parseByOption(optionsString, "require"),
             install: parseByOption(optionsString, "install"),
             vars: parseByOption(optionsString, "vars"),
-            return: parseByOption(optionsString, "return"),
+            assign: parseByOption(optionsString, "assign"),
         }
 
         return options
