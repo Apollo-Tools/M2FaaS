@@ -85,8 +85,36 @@ async function main(project) {
                 fs.writeFileSync('./out/simpleFunction.js', fileContent.join("\n"));
 
                 // Generate package.json
-                var pckgGenerator = require('./utils/packageGenerator')
-                pckgGenerator.packageGen(functionName, installs)
+                var pckgGenerator = require('./utils/packageGenerator');
+                pckgGenerator.packageGen(functionName, installs);
+
+                // Deploy function
+                const AdmZip = require('adm-zip');
+                var zip = new AdmZip();
+                zip.addLocalFile('./out/aws/foo.js');
+                zip.addLocalFile('./out/aws/index.js');
+                zip.addLocalFile('./out/aws/package.json');
+                zip.writeZip('./out/aws/aws.zip');
+
+                var awsSDK = require('aws-sdk');
+                var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});
+                let deploy = (new (require('aws-sdk'))
+                    .Lambda({ accessKeyId: credentialsAmazon.accessKeyId, secretAccessKey: credentialsAmazon.secretAccessKey, region: region })
+                    .createFunction(
+                        {
+                            Code: {
+                                ZipFile: fs.readFileSync('./out/aws/aws.zip')
+                            },
+                            FunctionName: functionName,
+                            Handler: 'index.handler',
+                            MemorySize: 128,
+                            Runtime: 'nodejs14.x',
+                            Timeout: 60,
+                            Role: 'arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s'
+                        }
+                    )
+                    .promise().then(p => p.Payload));
+                console.log(deploy)
             });
 
         } else if(line.includes('cfun')){

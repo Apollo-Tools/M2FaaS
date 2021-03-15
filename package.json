@@ -14,9 +14,10 @@
   },
   "homepage": "https://github.com/Apollo-Tools/m2faas#readme",
   "dependencies": {
+    "adm-zip": "^0.4.16",
+    "aws-sdk": "latest",
     "prettier": "^2.0.5",
-    "webpack": "^4.0.0",
     "tmp": "^0.2.1",
-    "aws-sdk": "latest"
+    "webpack": "^4.0.0"
   }
 }
