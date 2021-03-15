@@ -4,19 +4,26 @@ const fs = require('fs')
 const path = require('path')
 
 module.exports = {
-  bundle: async function (entry, filename) {
-    let infilepath = tmp.fileSync({ postfix: '.js' });
-    infilepath = infilepath.name
-    let outfiledir = tmp.dirSync();
-    outfiledir = outfiledir.name
-    await new Promise((resolve, reject) => {
+
+    /**
+     * Create WebPack function.
+     *
+     * @param entry point for webPack
+     * @param filename to be stored
+     *
+     * @returns {Promise<string>} file content
+     */
+    bundle: async function (entry, filename) {
+        let outPutFileDirectory = tmp.dirSync();
+        outPutFileDirectory = outPutFileDirectory.name;
+        await new Promise((resolve, reject) => {
            webpack(
              {
                mode: 'development', // don't scramble source
                entry: entry,
                target: 'node',
                output: {
-                 path: outfiledir,
+                 path: outPutFileDirectory,
                  filename: filename
                },
              }
@@ -37,7 +44,7 @@ module.exports = {
                }
              });
          })
-    const bundlejssrc = fs.readFileSync(path.join(outfiledir, filename), { encoding: 'utf8' })
+    const bundlejssrc = fs.readFileSync(path.join(outPutFileDirectory, filename), { encoding: 'utf8' })
     const fcontent = `
         const a =
          ${ bundlejssrc}
