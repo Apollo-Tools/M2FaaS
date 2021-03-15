@@ -14,7 +14,6 @@
   },
   "homepage": "https://github.com/Apollo-Tools/m2faas#readme",
   "dependencies": {
-    "esprima": "^4.0.1",
     "prettier": "^2.0.5",
     "webpack": "^4.0.0",
     "tmp": "^0.2.1",

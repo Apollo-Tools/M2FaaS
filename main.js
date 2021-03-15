@@ -3,8 +3,7 @@
  */
 const fs = require('fs');
 const readline = require('readline');
-const prettier = require('prettier')
-const awsSDK = require('aws-sdk');
+const prettier = require('prettier');
 
 /**
  * Internal project dependencies.
