@@ -37,7 +37,7 @@ async function main(project) {
 
         console.log("Checking file \"" + absolutePath + "\" ...");
 
-        fs.readFile(absolutePath, 'utf8', function (err, data) {
+        await fs.readFile(absolutePath, 'utf8', async function (err, data) {
             // Convert file to string[]
             var fileContent = data.split("\n")
 
@@ -55,7 +55,7 @@ async function main(project) {
             var cFunctionFiles = [];
 
             // Read line by line
-            readInterface.on('line', async function (line) {
+            await readInterface.on('line', async function (line) {
 
                 // Increase total number of lines
                 lines++;
