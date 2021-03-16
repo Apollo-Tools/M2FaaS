@@ -73,10 +73,15 @@ async function main(project) {
                         fs.mkdirSync("out/" + provider);
                     }
 
+                    console.log("-req-" + requires)
+                    console.log("-in-" + inputs)
+                    console.log("-codeBlock-" + codeBlock)
+                    console.log("-ret-" + returnJsonString)
+
                     // Create index.js file for the cloud function
                     fs.writeFileSync(
                         "out/" + provider + "/" + functionName + ".js",
-                        aws.index(requires, inputs, codeBlock, /*returnJsonString*/"{}")
+                        aws.index(requires, inputs, codeBlock, "returnJsonString")
                     );
                     cFunctionFiles.push(functionName + ".js");
 
