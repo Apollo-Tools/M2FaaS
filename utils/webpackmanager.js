@@ -16,7 +16,8 @@ module.exports = {
     bundle: async function (entry, filename) {
         let outPutFileDirectory = tmp.dirSync();
         outPutFileDirectory = outPutFileDirectory.name;
-        await new Promise((resolve, reject) => {
+
+        return new Promise((resolve, reject) => {
            webpack(
              {
                mode: 'development', // don't scramble source
@@ -40,20 +41,19 @@ module.exports = {
 
                  reject(err, stats)
                } else {
+                   const bundlejssrc = fs.readFileSync(path.join(outPutFileDirectory, filename), { encoding: 'utf8' })
+                   const fcontent = `
+                    const a =
+                     ${ bundlejssrc}
+                    ;module.exports = a;
+                  `;
+                   fs.writeFileSync(
+                       "out/aws/foo.js",
+                       fcontent
+                   );
                  resolve()
                }
              });
-         })
-    const bundlejssrc = fs.readFileSync(path.join(outPutFileDirectory, filename), { encoding: 'utf8' })
-    const fcontent = `
-        const a =
-         ${ bundlejssrc}
-        ;module.exports = a;
-      `
-    fs.writeFileSync(
-        "out/aws/"+filename,
-        fcontent
-      )
-    return fcontent
+         });
   }
 };
