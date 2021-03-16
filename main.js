@@ -10,6 +10,7 @@ const prettier = require('prettier');
  */
 const generator = require('./utils/generator');
 const optionsDetector = require('./utils/options');
+const aws = require('./utils/provider/aws');
 
 /**
  * Starting point of M2FaaS.
@@ -96,25 +97,7 @@ async function main(project) {
                 zip.addLocalFile('./out/aws/package.json');
                 zip.writeZip('./out/aws/aws.zip');
 
-                var awsSDK = require('aws-sdk');
-                var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});
-                let deploy = (new (require('aws-sdk'))
-                    .Lambda({ accessKeyId: credentialsAmazon.accessKeyId, secretAccessKey: credentialsAmazon.secretAccessKey, region: region })
-                    .createFunction(
-                        {
-                            Code: {
-                                ZipFile: fs.readFileSync('./out/aws/aws.zip')
-                            },
-                            FunctionName: functionName,
-                            Handler: 'index.handler',
-                            MemorySize: 128,
-                            Runtime: 'nodejs14.x',
-                            Timeout: 60,
-                            Role: 'arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s'
-                        }
-                    )
-                    .promise().then(p => p.Payload));
-                console.log(deploy)
+                aws.deploy(functionName, region);
             });
 
         } else if(line.includes('cfun')){
