@@ -41,14 +41,14 @@ async function main(project) {
             // Convert file to string[]
             var fileContent = data.split("\n")
 
-            // Creat read interface to read line by line
+            // Create read interface to read line by line
             const readInterface = readline.createInterface({
                 input: fs.createReadStream(absolutePath)
             });
 
             // Initialize variables
             let requires = '', inputs = '', codeBlock = '', returnJsonString = '', jsonInput = '', funcReturn = '',
-                functionName = '';
+                functionName = '', startLineContent = '';
             let provider = 'aws';
             let inCodeBlock = false, firstLine = false;
             let startLine = -1, endLine = -1, lines = 0;
@@ -60,10 +60,11 @@ async function main(project) {
                 // Increase total number of lines
                 lines++;
 
+
                 // Detect code block
                 if (line.includes('cfunend')) {
 
-                    console.log("Porting cloud function " + functionName + " from \"" + absolutePath + "\" ...");
+                    inCodeBlock = false;
 
                     // End of code block
                     endLine = lines - 1;
@@ -73,66 +74,11 @@ async function main(project) {
                         fs.mkdirSync("out/" + provider);
                     }
 
-                    console.log("-req-" + requires)
-                    console.log("-in-" + inputs)
-                    console.log("-codeBlock-" + codeBlock)
-                    console.log("-ret-" + returnJsonString)
-
-                    // Create index.js file for the cloud function
-                    fs.writeFileSync(
-                        "out/" + provider + "/" + functionName + ".js",
-                        aws.index(requires, inputs, codeBlock, "returnJsonString")
-                    );
-                    cFunctionFiles.push(functionName + ".js");
-
-                    // Reset variables
-                    codeBlock = '';
-                    inCodeBlock = false;
-
-                    // Adapt initial source code and read file
-                    fileContent[startLine] = "/*\n" + fileContent[startLine];
-                    fileContent[endLine - 1] = fileContent[endLine - 1] + " */ ";
-
-                    // Add serverless function call to the monolith
-                    var region = 'us-east-1';
-                    fileContent[endLine] += "\n" + prettier.format(`
-                        var awsSDK = require('aws-sdk');
-                        var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});
-                        let ${functionName}Solution = JSON.parse(await (new (require('aws-sdk'))
-                            .Lambda({ accessKeyId: credentialsAmazon.accessKeyId, secretAccessKey: credentialsAmazon.secretAccessKey, region: '${region}' }))
-                            .invoke({
-                                FunctionName: "${functionName}",
-                                Payload: JSON.stringify(${jsonInput})
-                            })
-                            .promise().then(p => p.Payload));
-                        ${funcReturn}
-                        `, {parser: "babel"});
-
-                    // Generate package.json
-                    var pckgGenerator = require('./utils/packageGenerator');
-                    pckgGenerator.packageGen(functionName, installs);
-                    cFunctionFiles.push("package.json");
-
-                    // Deploy function
-                    const AdmZip = require('adm-zip');
-                    var zip = new AdmZip();
-                    for (const f of cFunctionFiles) {
-                        zip.addLocalFile('./out/' + provider + '/' + f);
-                    }
-                    zip.writeZip('./out/' + provider + '/' + provider + '.zip');
-
-                    //aws.deploy(functionName, region);
-
-                } else if (line.includes('cfun')) {
-
-                    // Found start of code block
-                    startLine = lines;
-
                     // Detect M2FaaS options
-                    var options = optionsDetector.getOptions(line);
+                    var options = optionsDetector.getOptions(startLineContent);
 
                     // TODO remove this line
-                    console.log(options);
+                    //console.log(options);
 
                     // Set function name
                     functionName = options.name;
@@ -171,13 +117,64 @@ async function main(project) {
                     options.install.forEach(function (value) {
                         installs[value] = "latest"
                     });
+
+                    console.log("Porting cloud function " + functionName + " from \"" + absolutePath + "\" ...");
+
+                    // Create index.js file for the cloud function
+                    fs.writeFileSync(
+                        "out/" + provider + "/" + functionName + ".js",
+                        aws.index(requires, inputs, codeBlock, returnJsonString)
+                    );
+                    cFunctionFiles.push(functionName + ".js");
+
+                    // Adapt initial source code and read file
+                    fileContent[startLine] = "/*\n" + fileContent[startLine];
+                    fileContent[endLine - 1] = fileContent[endLine - 1] + " */ ";
+
+                    // Add serverless function call to the monolith
+                    var region = 'us-east-1';
+                    fileContent[endLine] += "\n" + prettier.format(`var awsSDK = require('aws-sdk');
+                        var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});
+                        let ${functionName}Solution = JSON.parse(await (new (require('aws-sdk'))
+                            .Lambda({ accessKeyId: credentialsAmazon.accessKeyId, secretAccessKey: credentialsAmazon.secretAccessKey, region: '${region}' }))
+                            .invoke({
+                                FunctionName: "${functionName}",
+                                Payload: JSON.stringify(${jsonInput})
+                            })
+                            .promise().then(p => p.Payload));
+                        ${funcReturn}`, {parser: "babel"});
+
+                    // Generate package.json
+                    var pckgGenerator = require('./utils/packageGenerator');
+                    pckgGenerator.packageGen(functionName, installs);
+                    cFunctionFiles.push("package.json");
+
+                    // Deploy function
+                    const AdmZip = require('adm-zip');
+                    var zip = new AdmZip();
+                    for (const f of cFunctionFiles) {
+                        zip.addLocalFile('./out/' + provider + '/' + f);
+                    }
+                    zip.writeZip('./out/' + provider + '/' + provider + '.zip');
+
+                    //aws.deploy(functionName, region);
+
+                    // Reset variables
+                    codeBlock = '';
+                    fs.writeFileSync('./out/'+file, fileContent.join("\n"));
+
+                } else if (line.includes('cfun')) {
+
+                    // Found start of code block
+                    startLine = lines;
+                    startLineContent = line;
+
+                    inCodeBlock = true
                 }
 
                 // Save code block
-                inCodeBlock = true;
-                firstLine = true;
                 if (inCodeBlock) {
-                    firstLine ? firstLine = false : codeBlock += line + "\n";
+                    codeBlock += line + "\n";
                 }
             });
 
