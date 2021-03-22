@@ -16,9 +16,9 @@ module.exports = {
             JSON.stringify({
                 "name": name,
                 "version": "0.0.1",
-                "description": "",
+                "description": "automatically FaaSified by M2FaaS",
                 "main": "index.js",
-                "author": "",
+                "author": "M2FaaS",
                 "dependencies": dependencies
             })
         );

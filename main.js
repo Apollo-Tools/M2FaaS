@@ -2,8 +2,8 @@
  * External project dependencies.
  */
 const fs = require('fs');
-const readline = require('readline');
-const prettier = require('prettier');
+const readline = require('readline');;
+const path = require('path');;
 
 /**
  * Internal project dependencies.
@@ -18,12 +18,25 @@ const webpackmanager = require('./utils/webpackmanager')
  * @param project root directory
  * @returns {Promise<void>}
  */
+
+const getAllFiles = function(dirPath, arrayOfFiles, project) {
+    arrayOfFiles = arrayOfFiles || []
+    fs.readdirSync(dirPath).forEach(function(file) {
+        if (fs.statSync(dirPath + "/" + file).isDirectory()) {
+            if(!dirPath.includes('node_modules')){
+                arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles, project)
+            }
+        } else {
+            arrayOfFiles.push(dirPath.replace(project  + '','') + '/' + file)
+        }
+    })
+    return arrayOfFiles
+}
+
 async function main(project) {
 
     // Read all files in project root
-    let files = fs.readdirSync(project, {withFileTypes: true})
-        .filter(item => !item.isDirectory())
-        .map(item => item.name);
+    let files = getAllFiles(project, [], project)
 
     // Create output directory if it does not exists
     if (!fs.existsSync("out")) {
@@ -33,7 +46,7 @@ async function main(project) {
     // Iterate over all files
     for (let file of files) {
 
-        let absolutePath = project + "/" + file;
+        let absolutePath = project + file;
 
         console.log("Checking file \"" + absolutePath + "\" ...");
 
@@ -59,7 +72,6 @@ async function main(project) {
                 // Increase total number of lines
                 lines++;
 
-
                 // Detect code block
                 if (line.includes('cfunend')) {
 
@@ -75,9 +87,6 @@ async function main(project) {
 
                     // Detect M2FaaS options
                     var options = optionsDetector.getOptions(startLineContent);
-
-                    // TODO remove this line
-                    //console.log(options);
 
                     // Set function name
                     functionName = options.name;
@@ -155,7 +164,7 @@ async function main(project) {
 
                     // Reset variables
                     codeBlock = '';
-                    fs.writeFileSync('./out/'+file, fileContent.join("\n"));
+                    fs.writeFileSync('./out'+file, fileContent.join("\n"));
 
                 } else if (line.includes('cfun')) {
 
@@ -173,7 +182,7 @@ async function main(project) {
             });
 
             // Write file to output storage
-            fs.writeFileSync('./out/'+file, fileContent.join("\n"));
+            fs.writeFileSync('./out'+file, fileContent.join("\n"));
         });
     }
 }
