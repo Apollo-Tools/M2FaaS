@@ -53,7 +53,7 @@ module.exports = {
                         ZipFile: fs.readFileSync('./out/aws/aws.zip')
                     },
                     FunctionName: functionName,
-                    Handler: 'index.handler',
+                    Handler: functionName + '.handler',
                     MemorySize: 128,
                     Runtime: 'nodejs14.x',
                     Timeout: 60,
@@ -80,7 +80,7 @@ module.exports = {
             .updateFunctionConfiguration(
                 {
                     FunctionName: functionName,
-                    Handler: 'index.handler',
+                    Handler: functionName + '.handler',
                     MemorySize: 128,
                     Role: 'arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s',
                     Runtime: "nodejs14.x",

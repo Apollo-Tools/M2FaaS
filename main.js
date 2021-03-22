@@ -52,7 +52,6 @@ async function main(project) {
             let provider = 'aws';
             let inCodeBlock = false, firstLine = false;
             let startLine = -1, endLine = -1, lines = 0;
-            var cFunctionFiles = [];
 
             // Read line by line
             await readInterface.on('line', async function (line) {
@@ -92,7 +91,6 @@ async function main(project) {
                         if (/^\w+$/.test(requireElement[0]) === false) {
                             let jsFile = requireElement[0].match('[a-zA-Z]*.js')[0];
                             await webpackmanager.bundle(project + "/" + jsFile, jsFile);
-                            cFunctionFiles.push(jsFile);
                         }
                     }
 
@@ -125,7 +123,6 @@ async function main(project) {
                         "out/" + provider + "/" + functionName + ".js",
                         aws.index(requires, inputs, codeBlock, returnJsonString)
                     );
-                    cFunctionFiles.push(functionName + ".js");
 
                     // Adapt initial source code and read file
                     fileContent[startLine] = "/*\n" + fileContent[startLine];
@@ -133,31 +130,28 @@ async function main(project) {
 
                     // Add serverless function call to the monolith
                     var region = 'us-east-1';
-                    fileContent[endLine] += "\n" + prettier.format(`var awsSDK = require('aws-sdk');
-                        var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});
-                        let ${functionName}Solution = JSON.parse(await (new (require('aws-sdk'))
-                            .Lambda({ accessKeyId: credentialsAmazon.accessKeyId, secretAccessKey: credentialsAmazon.secretAccessKey, region: '${region}' }))
-                            .invoke({
-                                FunctionName: "${functionName}",
-                                Payload: JSON.stringify(${jsonInput})
-                            })
-                            .promise().then(p => p.Payload));
-                        ${funcReturn}`, {parser: "babel"});
+                    fileContent[endLine] += "\nvar awsSDK = require('aws-sdk');\n" +
+                        "var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});\n" +
+                        "let " + functionName + "Solution = JSON.parse(await (new (require('aws-sdk'))\n" +
+                            "\t.Lambda({ accessKeyId: credentialsAmazon.accessKeyId, secretAccessKey: credentialsAmazon.secretAccessKey, region: '" + region + "' }))\n" +
+                            "\t.invoke({ FunctionName: \"" + functionName + "\", Payload: JSON.stringify("+jsonInput+")})\n" +
+                            "\t.promise().then(p => p.Payload));\n" + funcReturn;
 
                     // Generate package.json
                     var pckgGenerator = require('./utils/packageGenerator');
                     pckgGenerator.packageGen(functionName, installs);
-                    cFunctionFiles.push("package.json");
+
+                    // Generate node modules
+                    var child_process = require('child_process');
+                    child_process.execSync('cd out/' + provider + ' && npm install && cd ../..');
 
                     // Deploy function
                     const AdmZip = require('adm-zip');
                     var zip = new AdmZip();
-                    for (const f of cFunctionFiles) {
-                        zip.addLocalFile('./out/' + provider + '/' + f);
-                    }
+                    zip.addLocalFolder('./out/' + provider + '/')
                     zip.writeZip('./out/' + provider + '/' + provider + '.zip');
 
-                    //aws.deploy(functionName, region);
+                    aws.deploy(functionName, region);
 
                     // Reset variables
                     codeBlock = '';
