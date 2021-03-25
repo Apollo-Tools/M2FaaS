@@ -53,7 +53,7 @@ module.exports = {
                         ZipFile: fs.readFileSync('./out/aws/aws.zip')
                     },
                     FunctionName: functionName,
-                    Handler: functionName + '.handler',
+                    Handler: 'index.handler',
                     MemorySize: 128,
                     Runtime: 'nodejs14.x',
                     Timeout: 60,

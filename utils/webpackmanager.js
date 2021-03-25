@@ -47,11 +47,8 @@ module.exports = {
                      ${ bundlejssrc}
                     ;module.exports = a;
                   `;
-                   fs.writeFileSync(
-                       "out/aws/foo.js",
-                       fcontent
-                   );
-                 resolve()
+
+                 resolve(fcontent)
                }
              });
          });

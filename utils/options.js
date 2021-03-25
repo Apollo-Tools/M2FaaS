@@ -37,12 +37,15 @@ module.exports = {
      * @returns {{install: *, name: *, require: *, vars: *, assign: *}} json object
      */
     getOptions: function(optionsString) {
+        console.log(optionsString.match('deploy[ \t]*\\([^\\)]+\\)')[0].split('(').pop().split(')')[0])
+        console.log(JSON.parse('[{"result":true, "count":42}]'))
         return options = {
             name: parseByOption(optionsString, "name")[0],
             require: parseByOption(optionsString, "require"),
             install: parseByOption(optionsString, "install"),
             vars: parseByOption(optionsString, "vars"),
             assign: parseByOption(optionsString, "assign"),
+            deploy: JSON.parse(optionsString.match('deploy[ \t]*\\([^\\)]+\\)')[0].split('(').pop().split(')')[0]),
         }
     }
 }

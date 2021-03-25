@@ -11,16 +11,13 @@ module.exports = {
     packageGen: function(name, dependencies) {
 
         /// Write package.json file
-        fs.writeFileSync(
-            "out/aws/package.json",
-            JSON.stringify({
+        return JSON.stringify({
                 "name": name,
                 "version": "0.0.1",
                 "description": "automatically FaaSified by M2FaaS",
                 "main": "index.js",
                 "author": "M2FaaS",
                 "dependencies": dependencies
-            })
-        );
+        });
     }
 }
