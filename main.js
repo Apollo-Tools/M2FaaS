@@ -158,22 +158,23 @@ async function main(project) {
                         fileContent[endLine - 1] = fileContent[endLine - 1] + " */ ";
 
                         // Add serverless function call to the monolith
-                        var region = 'us-east-1';
-                        fileContent[endLine] += "\nvar awsSDK = require('aws-sdk');\n" +
-                            "var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});\n" +
-                            "let " + functionName + "Solution = JSON.parse(await (new (require('aws-sdk'))\n" +
-                            "\t.Lambda({ accessKeyId: credentialsAmazon.accessKeyId, secretAccessKey: credentialsAmazon.secretAccessKey, region: '" + region + "' }))\n" +
-                            "\t.invoke({ FunctionName: \"" + functionName + "\", Payload: JSON.stringify("+jsonInput+")})\n" +
-                            "\t.promise().then(p => p.Payload));\n" + funcReturn;
+                        if(provider === 'aws'){
+                            var region = 'us-east-1';
+                            fileContent[endLine] += "\nvar awsSDK = require('aws-sdk');\n" +
+                                "var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});\n" +
+                                "let " + functionName + "Solution = JSON.parse(await (new (require('aws-sdk'))\n" +
+                                "\t.Lambda({ accessKeyId: credentialsAmazon.accessKeyId, secretAccessKey: credentialsAmazon.secretAccessKey, region: '" + region + "' }))\n" +
+                                "\t.invoke({ FunctionName: \"" + functionName + "\", Payload: JSON.stringify("+jsonInput+")})\n" +
+                                "\t.promise().then(p => p.Payload));\n" + funcReturn;
+                        }else if (provider === 'ibm'){
+                            fileContent[endLine] += "\nlet " + functionName + "Solution = JSON.parse('{}');\n" +
+                                "child_process.execSync('ibmcloud fn action invoke m2FaaSExampleIBM -r',\n" +
+                                    "\tfunction (error, stdout, stderr) {\n" +
+                                        "\t\tres = JSON.parse(stdout)\n" +
+                                        "\t\tconsole.log(stdout)\n" +
+                                    "\t});\n" + funcReturn;
+                        }
 
-                        /*
-                        let res= JSON.parse('{}');
-                        child_process.execSync('ibmcloud fn action invoke m2FaaSExampleIBM -r',
-                            function (error, stdout, stderr) {
-                                res = JSON.parse(stdout)
-                                console.log(stdout)
-                            });
-                        * */
 
                         // Generate package.json
                         var pckgGenerator = require('./utils/packageGenerator');
