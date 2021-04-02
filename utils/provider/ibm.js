@@ -29,31 +29,29 @@ module.exports = {
     /**
      * Deploy new aws lambda function.
      *
-     * @param functionName of the cloud function
-     * @param region where to deploy
+     * @param deployment of the cloud function
      */
-    deploy: function(functionName, region) {
+    deploy: function(deployment) {
 
         // Deploy new ibm cloud action
         var child_process = require('child_process');
-        child_process.execSync('ibmcloud target -r '+region);
+        child_process.execSync('ibmcloud target -r ' + deployment.region);
 
         try {
-            child_process.execSync('ibmcloud fn action create ' + functionName + ' out\\ibm\\ibm.zip --kind nodejs:12');
+            child_process.execSync('ibmcloud fn action create ' + deployment.name + ' out\\ibm\\ibm.zip --kind ' + deployment.runtime);
         } catch (e) {
-            module.exports.update(functionName, region);
+            module.exports.update(deployment);
         }
     },
     /**
      * Update cloud function
      *
-     * @param functionName of the cloud function
-     * @param region where to deploy
+     * @param deployment of the cloud function
      */
-    update: function(functionName, region) {
+    update: function(deployment) {
 
         // Reconfigure ibm cloud action
         var child_process = require('child_process');
-        child_process.execSync('ibmcloud fn action update ' + functionName + ' out\\ibm\\ibm.zip --kind nodejs:12');
+        child_process.execSync('ibmcloud fn action update ' + deployment.name + ' out\\ibm\\ibm.zip --kind ' + deployment.runtime);
     }
 }

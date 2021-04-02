@@ -1,9 +1,14 @@
+/**
+ * External dependencies.
+ */
 const awsSDK = require('aws-sdk');
 const fs = require('fs');
 const prettier = require('prettier')
 
-// Shared aws credentials
-var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});
+/**
+ * Shared AWS credentials.
+ */
+const credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});
 
 module.exports = {
 
@@ -35,56 +40,54 @@ module.exports = {
     /**
      * Deploy new aws lambda function.
      *
-     * @param functionName of the cloud function
-     * @param region where to deploy
+     * @param deployment of the cloud function
      */
-    deploy: function(functionName, region) {
+    deploy: function(deployment) {
 
         // Deploy new aws lambda function
         new awsSDK
             .Lambda({
                 accessKeyId: credentialsAmazon.accessKeyId,
                 secretAccessKey: credentialsAmazon.secretAccessKey,
-                region: region
+                region: deployment.region
             })
             .createFunction(
                 {
                     Code: {
                         ZipFile: fs.readFileSync('./out/aws/aws.zip')
                     },
-                    FunctionName: functionName,
+                    FunctionName: deployment.name,
                     Handler: 'index.handler',
-                    MemorySize: 128,
-                    Runtime: 'nodejs14.x',
-                    Timeout: 60,
+                    MemorySize: deployment.memorySize,
+                    Runtime: deployment.runtime,
+                    Timeout: deployment.timeout,
                     Role: 'arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s'
                 }
             )
-            .promise().then(p => p.Payload).catch(function error(){ module.exports.update(functionName, region) } );
+            .promise().then(p => p.Payload).catch(function error(){ module.exports.update(deployment) } );
     },
     /**
      * Update cloud function
      *
-     * @param functionName of the cloud function
-     * @param region where to deploy
+     * @param deployment of the cloud function
      */
-    update: function(functionName, region) {
+    update: function(deployment) {
 
         // Reconfigure lambda function
         new awsSDK
             .Lambda({
                 accessKeyId: credentialsAmazon.accessKeyId,
                 secretAccessKey: credentialsAmazon.secretAccessKey,
-                region: region
+                region: deployment.region
             })
             .updateFunctionConfiguration(
                 {
-                    FunctionName: functionName,
-                    Handler: functionName + '.handler',
-                    MemorySize: 128,
+                    FunctionName: deployment.name,
+                    Handler: deployment.name + '.handler',
+                    MemorySize: deployment.memorySize,
+                    Runtime: deployment.runtime,
+                    Timeout: deployment.timeout,
                     Role: 'arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s',
-                    Runtime: "nodejs14.x",
-                    Timeout: 60,
                 }
             )
             .promise().then(p => p.Payload).catch(function error(err){console.log("Could not update configuration of lambda function: " + err)});
@@ -94,11 +97,11 @@ module.exports = {
             .Lambda({
                 accessKeyId: credentialsAmazon.accessKeyId,
                 secretAccessKey: credentialsAmazon.secretAccessKey,
-                region: region
+                region: deployment.region
             })
             .updateFunctionCode(
                 {
-                    FunctionName: functionName,
+                    FunctionName: deployment.name,
                     ZipFile: fs.readFileSync('./out/aws/aws.zip'),
                 }
             )

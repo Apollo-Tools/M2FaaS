@@ -51,6 +51,6 @@ module.exports = {
                  resolve(fcontent)
                }
              });
-         });
+        });
   }
 };
