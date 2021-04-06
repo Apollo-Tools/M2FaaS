@@ -44,6 +44,9 @@ module.exports = {
      */
     deploy: function(deployment) {
 
+        new awsSDK.IAM().createRole()
+
+
         // Deploy new aws lambda function
         new awsSDK
             .Lambda({
@@ -61,7 +64,7 @@ module.exports = {
                     MemorySize: deployment.memorySize,
                     Runtime: deployment.runtime,
                     Timeout: deployment.timeout,
-                    Role: 'arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s'
+                    Role: deployment.role
                 }
             )
             .promise().then(p => p.Payload).catch(function error(){ module.exports.update(deployment) } );
@@ -87,7 +90,7 @@ module.exports = {
                     MemorySize: deployment.memorySize,
                     Runtime: deployment.runtime,
                     Timeout: deployment.timeout,
-                    Role: 'arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s',
+                    Role: deployment.role,
                 }
             )
             .promise().then(p => p.Payload).catch(function error(err){console.log("Could not update configuration of lambda function: " + err)});
