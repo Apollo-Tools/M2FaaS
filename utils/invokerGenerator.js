@@ -19,7 +19,7 @@ module.exports = {
             "            }else if(element.provider === 'ibm'){\n" +
             "                solution = await new Promise(async (resolve, reject) => {\n" +
             "                    try {\n" +
-            "                        resolve(JSON.parse(require('child_process').execSync('ibmcloud fn action invoke -r ' + element.name + ' -p ' + JSON.stringify(input)).toString()))\n" +
+            "                        resolve(JSON.parse(require('child_process').execSync('ibmcloud fn action invoke -r ' + element.name + ' -p \\'' + JSON.stringify(input).replace(':',': ') + '\\'').toString()))\n" +
             "                    } catch(error) {}\n" +
             "                });\n" +
             "            }\n" +

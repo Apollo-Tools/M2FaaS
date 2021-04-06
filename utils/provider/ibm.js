@@ -16,7 +16,7 @@ module.exports = {
         return prettier.format(`
                 ${requires}
 
-                function main(event) {
+                async function main(event) {
                     ${inputs}
                     ${codeBlock}
                     
@@ -38,7 +38,7 @@ module.exports = {
         child_process.execSync('ibmcloud target -r ' + deployment.region);
 
         try {
-            child_process.execSync('ibmcloud fn action create ' + deployment.name + ' out\\ibm\\ibm.zip --kind ' + deployment.runtime + " --memory " + deployment.memory + " --timeout " + (deployment.timeout * 1000));
+            child_process.execSync('ibmcloud fn action create ' + deployment.name + ' out\\ibm\\ibm.zip --kind ' + deployment.runtime + " --memory " + deployment.memorySize + " --timeout " + (deployment.timeout * 1000));
         } catch (e) {
             module.exports.update(deployment);
         }
@@ -52,6 +52,6 @@ module.exports = {
 
         // Reconfigure ibm cloud action
         var child_process = require('child_process');
-        child_process.execSync('ibmcloud fn action update ' + deployment.name + ' out\\ibm\\ibm.zip --kind ' + deployment.runtime + " --memory " + deployment.memory + " --timeout " + (deployment.timeout * 1000));
+        child_process.execSync('ibmcloud fn action update ' + deployment.name + ' out\\ibm\\ibm.zip --kind ' + deployment.runtime + " --memory " + deployment.memorySize + " --timeout " + (deployment.timeout * 1000));
     }
 }
