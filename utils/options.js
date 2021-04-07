@@ -40,7 +40,6 @@ module.exports = {
         console.log(optionsString.match('deploy[ \t]*\\([^\\)]+\\)')[0].split('(').pop().split(')')[0])
         console.log(JSON.parse('[{"result":true, "count":42}]'))
         return options = {
-            name: parseByOption(optionsString, "name")[0],
             require: parseByOption(optionsString, "require"),
             install: parseByOption(optionsString, "install"),
             vars: parseByOption(optionsString, "vars"),

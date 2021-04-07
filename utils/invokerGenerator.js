@@ -9,7 +9,7 @@ module.exports = {
             "        let solution = {};\n" +
             "        for(var i = 0; i < deploy.length; i++) {\n" +
             "            let element = deploy[i];\n" +
-            "            if(element.provider === 'aws'){\n" +
+            "            try{if(element.provider === 'aws'){\n" +
             "                var awsSDK = require('aws-sdk');\n" +
             "                var credentialsAmazon = new awsSDK.SharedIniFileCredentials({profile: 'default'});\n" +
             "                solution = JSON.parse(await (new (require('aws-sdk'))\n" +
@@ -22,7 +22,7 @@ module.exports = {
             "                        resolve(JSON.parse(require('child_process').execSync('ibmcloud fn action invoke -r ' + element.name + ' -p \\'' + JSON.stringify(input).replace(':',': ') + '\\'').toString()))\n" +
             "                    } catch(error) {}\n" +
             "                });\n" +
-            "            }\n" +
+            "            }}catch (e){solution.error = e;}\n" +
             "\n" +
             "            if(!solution.hasOwnProperty('errorMessage') && !solution.hasOwnProperty('error')){\n" +
             "                if(element.provider === 'aws' && solution.hasOwnProperty('body')){\n" +
