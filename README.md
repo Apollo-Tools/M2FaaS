@@ -80,13 +80,13 @@ The deployment configuration is represented as a json-array:
 ````json
 [
   {
-    "name": "m2FaaSExampleAWS",                       // The name of the cloud function
-    "provider": "aws",                                // The provider where the function should be deployed
-    "region": "us-east-1",                            // The deployment region
-    "memorySize": 128,                                // Memory assignment of the function in MB
-    "runtime": "nodejs14.x",                          // The runtime of the cloud function
-    "timeout": 3,                                     // The function timeout in seconds
-    "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s" // The AWS execution role
+    "name": "m2FaaSExampleAWS",                       "// The name of the cloud function"
+    "provider": "aws",                                "// The provider where the function should be deployed"
+    "region": "us-east-1",                            "// The deployment region"
+    "memorySize": 128,                                "// Memory assignment of the function in MB"
+    "runtime": "nodejs14.x",                          "// The runtime of the cloud function"
+    "timeout": 3,                                     "// The function timeout in seconds"
+    "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s" "// The AWS execution role"
   },
   {
     "name": "m2FaaSExampleIBM",                       
