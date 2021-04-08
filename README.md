@@ -1,5 +1,9 @@
 <h1 align="center">M2FaaS (Monolith-to-FaaS)</h1>
 
+## Prerequisite
+
+Installed and configured ``AWS CLI`` and ``ÌBM CLI``.
+
 ## Install
 
 TBA
@@ -82,22 +86,24 @@ The deployment configuration is represented as a json-array:
   {
     "name": "m2FaaSExampleAWS",                       
     "provider": "aws",                                
-    "region": "us-east-1",                            
-    "memorySize": 128,                                
-    "runtime": "nodejs14.x",                          
-    "timeout": 3,                                     
-    "role": "arn:aws:iam::xxxxxxxxxxx:role/service-role/xxxxxxx" 
+    "region": "us-east-1",?                            
+    "memorySize": 128,?                                
+    "runtime": "nodejs14.x",?                          
+    "timeout": 3,?                                     
+    "role": "arn:aws:iam::xxxxxxxxxxx:role/service-role/xxxxxxx"? 
   },
   {
     "name": "m2FaaSExampleIBM",                       
     "provider": "ibm",                                
-    "region": "eu-gb", 
-    "memorySize": 128, 
-    "runtime": "nodejs:12", 
-    "timeout": 60
+    "region": "eu-gb",? 
+    "memorySize": 128,? 
+    "runtime": "nodejs:12",? 
+    "timeout": 60?
   }
 ]
 ````
+
+``?`` represents an optional input. Otherwise default values will be used: TODO
 
 ````js
 //cfun deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])

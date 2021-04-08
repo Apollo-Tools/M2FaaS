@@ -52,7 +52,7 @@ module.exports = {
             .Lambda({
                 accessKeyId: credentialsAmazon.accessKeyId,
                 secretAccessKey: credentialsAmazon.secretAccessKey,
-                region: deployment.region
+                region: deployment.region !== undefined ? deployment.region : 'us-east-1'
             })
             .createFunction(
                 {
@@ -61,9 +61,9 @@ module.exports = {
                     },
                     FunctionName: deployment.name,
                     Handler: 'index.handler',
-                    MemorySize: deployment.memorySize,
-                    Runtime: deployment.runtime,
-                    Timeout: deployment.timeout,
+                    MemorySize: deployment.memorySize !== undefined ? deployment.memorySize : 128,
+                    Runtime: deployment.runtime !== undefined ? deployment.runtime : 'nodejs14.x',
+                    Timeout: deployment.timeout !== undefined ? deployment.timeout : 60,
                     Role: deployment.role
                 }
             )
@@ -81,15 +81,15 @@ module.exports = {
             .Lambda({
                 accessKeyId: credentialsAmazon.accessKeyId,
                 secretAccessKey: credentialsAmazon.secretAccessKey,
-                region: deployment.region
+                region: deployment.region !== undefined ? deployment.region : 'us-east-1'
             })
             .updateFunctionConfiguration(
                 {
                     FunctionName: deployment.name,
                     Handler: deployment.name + '.handler',
-                    MemorySize: deployment.memorySize,
-                    Runtime: deployment.runtime,
-                    Timeout: deployment.timeout,
+                    MemorySize: deployment.memorySize !== undefined ? deployment.memorySize : 128,
+                    Runtime: deployment.runtime !== undefined ? deployment.runtime : 'nodejs14.x',
+                    Timeout: deployment.timeout !== undefined ? deployment.timeout : 60,
                     Role: deployment.role,
                 }
             )
@@ -100,7 +100,7 @@ module.exports = {
             .Lambda({
                 accessKeyId: credentialsAmazon.accessKeyId,
                 secretAccessKey: credentialsAmazon.secretAccessKey,
-                region: deployment.region
+                region: deployment.region !== undefined ? deployment.region : 'us-east-1'
             })
             .updateFunctionCode(
                 {
