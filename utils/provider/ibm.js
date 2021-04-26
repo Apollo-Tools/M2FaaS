@@ -31,7 +31,7 @@ module.exports = {
      *
      * @param deployment of the cloud function
      */
-    deploy: function(deployment) {
+    deploy: function(deployment, zip) {
 
         // Deploy new ibm cloud action
         var child_process = require('child_process');

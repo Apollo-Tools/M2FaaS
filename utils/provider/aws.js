@@ -42,7 +42,7 @@ module.exports = {
      *
      * @param deployment of the cloud function
      */
-    deploy: function(deployment) {
+    deploy: function(deployment, zip) {
 
         new awsSDK.IAM().createRole()
 
@@ -57,7 +57,7 @@ module.exports = {
             .createFunction(
                 {
                     Code: {
-                        ZipFile: fs.readFileSync('./out/aws/aws.zip')
+                        ZipFile: fs.readFileSync('./out/'+ zip)
                     },
                     FunctionName: deployment.name,
                     Handler: 'index.handler',
@@ -86,7 +86,7 @@ module.exports = {
             .updateFunctionConfiguration(
                 {
                     FunctionName: deployment.name,
-                    Handler: deployment.name + '.handler',
+                    Handler: 'index.handler',
                     MemorySize: deployment.memorySize !== undefined ? deployment.memorySize : 128,
                     Runtime: deployment.runtime !== undefined ? deployment.runtime : 'nodejs14.x',
                     Timeout: deployment.timeout !== undefined ? deployment.timeout : 60,

@@ -86,26 +86,28 @@ async function main(project) {
                     console.log(options)
 
                     // Handle require option
-                    for (const value of options.require) {
-                        let requireElement = value.split(' as ')
-                        requires += "const " + requireElement[1] + " = require(\"" + requireElement[0] + "\")\n"
+                    if (options.require !== null) {
+                        for (const value of options.require) {
+                            let requireElement = value.split(' as ')
+                            requires += "const " + requireElement[1] + " = require(\"" + requireElement[0] + "\")\n"
 
-                        // Handle file dependencies for local dependencies
-                        if (/^\w+$/.test(requireElement[0]) === false) {
-                            let jsFile = requireElement[0].match('[a-zA-Z]*.js')[0];
-                            let fContent = await webpackManager.bundle(project + "/" + jsFile, jsFile);
+                            // Handle file dependencies for local dependencies
+                            if (/^\w+$/.test(requireElement[0]) === false) {
+                                let jsFile = requireElement[0].match('[a-zA-Z]*.js')[0];
+                                let fContent = await webpackManager.bundle(project + "/" + jsFile, jsFile);
 
-                            options.deploy.forEach(element => {
-                                let provider = element.provider;
-                                // Create directory for provider
-                                if (!fs.existsSync("out/" + provider)) {
-                                    fs.mkdirSync("out/" + provider);
-                                }
-                                fs.writeFileSync(
-                                    "out/"+provider+"/"+jsFile,
-                                    fContent
-                                );
-                            });
+                                options.deploy.forEach(element => {
+                                    let provider = element.provider;
+                                    // Create directory for provider
+                                    if (!fs.existsSync("out/" + provider)) {
+                                        fs.mkdirSync("out/" + provider);
+                                    }
+                                    fs.writeFileSync(
+                                        "out/" + provider + "/" + jsFile,
+                                        fContent
+                                    );
+                                });
+                            }
                         }
                     }
 
@@ -119,9 +121,11 @@ async function main(project) {
 
                     // Handle install option
                     const installs = {};
-                    options.install.forEach(function (value) {
-                        installs[value] = "latest"
-                    });
+                    if(options.install !== null){
+                        options.install.forEach(function (value) {
+                            installs[value] = "latest"
+                        });
+                    }
 
                     const depIn = [];
                     options.deploy.forEach(element => {
@@ -153,9 +157,13 @@ async function main(project) {
                             indexFile = ibm.index(requires, inputs, codeBlock, returnJsonString);
                         }
 
+                        if (!fs.existsSync("out/" + provider + "/" + element.name)) {
+                            fs.mkdirSync("out/" + provider + "/" + element.name);
+                        }
+
                         // Create index.js file for the cloud function
                         fs.writeFileSync(
-                            "out/" + provider + "/index.js",
+                            "out/" + provider + "/" + element.name + "/index.js",
                             indexFile
                         );
 
@@ -169,25 +177,25 @@ async function main(project) {
                         const pckgGenerator = require('./utils/packageGenerator');
                         let packageContent = pckgGenerator.packageGen(functionName, installs);
                         fs.writeFileSync(
-                            "out/"+provider+"/package.json",
+                            "out/"+provider+ "/" + element.name + "/package.json",
                             packageContent
                         );
 
                         // Generate node modules
                         const child_process = require('child_process');
-                        child_process.execSync('cd out/' + provider + ' && npm install && cd ../..');
+                        child_process.execSync('cd out/' + provider + "/" + element.name +  ' && npm install && cd ../..');
 
                         // Deploy function
                         const AdmZip = require('adm-zip');
                         const zip = new AdmZip();
-                        zip.addLocalFolder('./out/' + provider + '/')
-                        zip.writeZip('./out/' + provider + '/' + provider + '.zip');
+                        zip.addLocalFolder('./out/' + provider + "/" + element.name +  '/')
+                        zip.writeZip('./out/' + provider + "/" + element.name +  '/' + provider + '.zip');
 
                         if(provider === 'aws'){
-                            aws.deploy(element);
+                            aws.deploy(element, provider + "/" + element.name +  '/aws.zip');
                         }else if (provider === 'ibm'){
                             region = 'eu-gb'
-                            ibm.deploy(element)
+                            ibm.deploy(element, "out\\"+provider+"\\"+element.name+"\\ibm.zip")
                         }
                     });
 
@@ -232,4 +240,4 @@ async function main(project) {
     }
 }
 
-main("./example")
+main("./example_eval_n2f")
