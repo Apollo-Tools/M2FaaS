@@ -1,0 +1,14 @@
+{
+  "name": "calc_local",
+  "version": "1.0.0",
+  "description": "Example to explore bounds of computations: CPU, Memory and IO",
+  "main": "gca.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "latest",
+    "@cloudant/cloudant": "latest"
+  }
+}
