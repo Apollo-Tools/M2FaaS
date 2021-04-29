@@ -3,16 +3,10 @@ const Cloudant = require('@cloudant/cloudant');
 const Utils = require("./utils");
 const Config = require("./config");
 
+let securityGPS = "";
+
 async function getPassengers(flightID){
-
-    // Connect to Cloudant and select database
-    const cloudant = new Cloudant(Config.ibm_config);
-    const db = cloudant.db.use('passenger');
-
-    // Get all documents from the DB
-    let allDocs = null;
-    await db.list({ include_docs: true }).then(function(data) { allDocs = data; });
-
+    let allDocs = await new Cloudant(Config.ibm_config).db.use('passenger').list({ include_docs: true }).then(function(data) { return data; });
     let passengerIDs = [];
     for (let i = 0; i < allDocs.rows.length; i++) {
         if(allDocs.rows[i].doc.atAirport && allDocs.rows[i].doc.flightId === flightID){
@@ -22,13 +16,11 @@ async function getPassengers(flightID){
     return { passengerIDs: passengerIDs, passengersAtAirport: passengerIDs.length };
 }
 
-async function secCheckTime(securityGPS){
-    const start = Date.now()
+async function secCheckTime(){
     AWS.config = new AWS.Config(Config.aws_config);
-    const client = new AWS.Rekognition();
-    const params = { Image: { S3Object: { Bucket: 'gcacameraimages', Name: "security_"+securityGPS+".jpg" }, }, MaxLabels: 100 }
     const array = [];
-    await client.detectLabels(params, function (err, response) {
+    await new AWS.Rekognition().detectLabels({ Image: { S3Object: { Bucket: 'gcacameraimages', Name: "security_" + securityGPS + ".jpg" }, }, MaxLabels: 100 },
+        function (err, response) {
         if (err) { console.log(err, err.stack);
         } else { response.Labels.forEach(label => {}) }
     }).promise().then(data => {
@@ -48,20 +40,13 @@ async function secCheckTime(securityGPS){
         delay = persons * 3;
     }catch (e) {}
 
-    console.log(Date.now() - start)
-
     return delay;
 }
 
 async function getGateGPS(gate){
 
-    // Connect to Cloudant and select database
-    const cloudant = new Cloudant(Config.ibm_config);
-    const db = cloudant.db.use('gate');
-
     // Get all documents from the DB
-    let allDocs = null;
-    await db.list({include_docs:true}).then(function(data) { allDocs = data; });
+    let allDocs = await new Cloudant(Config.ibm_config).db.use('gate').list({include_docs:true}).then(function(data) { return data; });
 
     // Prepare inputs
     let gateGPS = "", secGPS = "";
@@ -74,10 +59,9 @@ async function getGateGPS(gate){
         }
     }
 
-    return {
-        gateGPS: gateGPS,
-        securityGPS: secGPS
-    };
+    securityGPS = secGPS;
+
+    return gateGPS;
 }
 
 async function distanceGPS(params){
@@ -96,38 +80,6 @@ async function distanceGPS(params){
     return {
         "area": params.area,
         "delay": delayInMin
-    };
-}
-
-async function readGPS(passengerId){
-
-    // Connect to Cloudant and select database
-    const cloudant = new Cloudant(Config.ibm_config);
-    const db = cloudant.db.use('passenger');
-
-    // Get doc by id
-    const passenger = await db.get(passengerId);
-    const passengerGPS = [];
-    passengerGPS.push(Number(passenger.gpsLocation.split(", ")[0]));
-    passengerGPS.push(Number(passenger.gpsLocation.split(", ")[1]));
-
-    // Check if passenger inside security check
-    const afterSecCheck = Utils.inside(
-        passengerGPS,
-        [
-                [47.25756215011163, 11.350859214052116],
-                [47.25783976426809, 11.350793499933715],
-                [47.25793624622426, 11.351679969979884],
-                [47.25766682447269, 11.351745684098283]
-            ]
-    );
-
-    let area = 1;
-    if(afterSecCheck){ area = 0; }
-
-    return {
-        passengerGPS: passenger.gpsLocation,
-        area: area
     };
 }
 
@@ -153,14 +105,16 @@ async function averageTime(results){
 
 async function main(input){
 
+    securityGPS = input.securityGPS;
+
     /* Parallel */
     const promGetPassengers = getPassengers(input.flightID);
-    const promSecCheckTime = secCheckTime(input.securityGPS); // TODO
+    const promSecCheckTime = secCheckTime(securityGPS); // TODO
     const promGetGateGPS = getGateGPS(input.gateID);
     const resGetGateGPS = await promGetGateGPS;
     const promDistanceGPS = distanceGPS({
-        "gps1": resGetGateGPS.gateGPS,
-        "gps2": resGetGateGPS.securityGPS,
+        "gps1": resGetGateGPS,
+        "gps2": securityGPS,
     });
     const resGetPassengers = await promGetPassengers;
     const resSecCheckTime = await promSecCheckTime;
@@ -174,22 +128,30 @@ async function main(input){
     /* ParallelFor */
     let avg = await Promise.all(resGetPassengers.passengerIDs.map(function (node) {
         return new Promise(async function (resolve, reject) {
-            const resReadGPS = await readGPS(node);
-            console.log("resreadGPS: " + JSON.stringify(resReadGPS))
-            if(resReadGPS.area === 1){
+
+            // -> we would like to port this as readGPS
+            const passenger = await new Cloudant(Config.ibm_config).db.use('passenger').get(node);
+            const passengerGPS = [];
+            passengerGPS.push(Number(passenger.gpsLocation.split(", ")[0]));
+            passengerGPS.push(Number(passenger.gpsLocation.split(", ")[1]));
+            const afterSecCheck = Utils.inside( passengerGPS, [[47.25756215011163, 11.350859214052116], [47.25783976426809, 11.350793499933715], [47.25793624622426, 11.351679969979884], [47.25766682447269, 11.351745684098283]]);
+            let area = 1;
+            if(afterSecCheck){ area = 0; }
+            // <- we would like to port this as readGPS
+
+            if(area === 1){
                 const resPassSec = await distanceGPS({
-                        "gps1": resGetGateGPS.securityGPS,
-                        "gps2": resReadGPS.passengerGPS,
-                        "area": resReadGPS.area
+                        "gps1": securityGPS,
+                        "gps2": passenger.gpsLocation,
+                        "area": area
                     });
-                resolve({ "area": resReadGPS.area, "delay": (Number(resPassSec.delay) + Number(resSecCheckTime) + Number(resDistanceGPS.delay)) })
+                resolve({ "area": area, "delay": (Number(resPassSec.delay) + Number(resSecCheckTime) + Number(resDistanceGPS.delay)) })
                 console.log("resPassSec: " + JSON.stringify(resPassSec))
-                console.log("resSumUp: " + JSON.stringify(resSumUp))
             }else{
                 const resDistanceGPS = await  distanceGPS({
-                    "gps1": resGetGateGPS.securityGPS,
-                    "gps2": resReadGPS.passengerGPS,
-                    "area": resReadGPS.area
+                    "gps1": securityGPS,
+                    "gps2": passenger.gpsLocation,
+                    "area": area
                 })
                 resolve(resDistanceGPS);
                 console.log("resDistanceGPS: " + JSON.stringify(resDistanceGPS))
