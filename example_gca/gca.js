@@ -129,7 +129,7 @@ async function main(input){
     let avg = await Promise.all(resGetPassengers.passengerIDs.map(function (node) {
         return new Promise(async function (resolve, reject) {
 
-            // -> we would like to port this as readGPS
+            // cfun require(@cloudant/cloudant as Cloudant,./utils.js as Utils,./config.js as Config) assign(area,passenger) vars(node) install(@cloudant/cloudant) deploy([{"name": "readGPSAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 30, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"}])
             const passenger = await new Cloudant(Config.ibm_config).db.use('passenger').get(node);
             const passengerGPS = [];
             passengerGPS.push(Number(passenger.gpsLocation.split(", ")[0]));
@@ -137,7 +137,7 @@ async function main(input){
             const afterSecCheck = Utils.inside( passengerGPS, [[47.25756215011163, 11.350859214052116], [47.25783976426809, 11.350793499933715], [47.25793624622426, 11.351679969979884], [47.25766682447269, 11.351745684098283]]);
             let area = 1;
             if(afterSecCheck){ area = 0; }
-            // <- we would like to port this as readGPS
+            // cfunend
 
             if(area === 1){
                 const resPassSec = await distanceGPS({

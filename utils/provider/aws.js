@@ -67,14 +67,14 @@ module.exports = {
                     Role: deployment.role
                 }
             )
-            .promise().then(p => p.Payload).catch(function error(){ module.exports.update(deployment) } );
+            .promise().then(p => p.Payload).catch(function error(){ module.exports.update(deployment, zip) } );
     },
     /**
      * Update cloud function
      *
      * @param deployment of the cloud function
      */
-    update: function(deployment) {
+    update: function(deployment, zip) {
 
         // Reconfigure lambda function
         new awsSDK
@@ -105,7 +105,7 @@ module.exports = {
             .updateFunctionCode(
                 {
                     FunctionName: deployment.name,
-                    ZipFile: fs.readFileSync('./out/aws/aws.zip'),
+                    ZipFile: fs.readFileSync('./out/' + zip),
                 }
             )
             .promise().then(p => p.Payload).catch(function error(err){console.log("Could not update function code of lambda function: " + err)});

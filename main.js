@@ -92,8 +92,8 @@ async function main(project) {
                             requires += "const " + requireElement[1] + " = require(\"" + requireElement[0] + "\")\n"
 
                             // Handle file dependencies for local dependencies
-                            if (/^\w+$/.test(requireElement[0]) === false) {
-                                let jsFile = requireElement[0].match('[a-zA-Z]*.js')[0];
+                            if (/^.\//.test(requireElement[0]) === true) {
+                                let jsFile = requireElement[0].match('([a-zA-Z])*.js')[0];
                                 let fContent = await webpackManager.bundle(project + "/" + jsFile, jsFile);
 
                                 options.deploy.forEach(element => {
@@ -103,7 +103,7 @@ async function main(project) {
                                         fs.mkdirSync("out/" + provider);
                                     }
                                     fs.writeFileSync(
-                                        "out/" + provider + "/" + jsFile,
+                                        "out/" + provider + "/" + element.name + "/" + jsFile,
                                         fContent
                                     );
                                 });
@@ -240,4 +240,4 @@ async function main(project) {
     }
 }
 
-main("./example_eval_n2f")
+main("./example_gca")
