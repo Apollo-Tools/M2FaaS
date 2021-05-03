@@ -5,6 +5,10 @@ const Config = require("./config");
 
 let securityGPS = "";
 
+const PASSENGER_DB = 'passenger';
+const AWS_BUCKET = 'gcacameraimages';
+const GATE_DB = 'gate';
+
 async function getPassengers(flightID){
     let allDocs = await new Cloudant(Config.ibm_config).db.use('passenger').list({ include_docs: true }).then(function(data) { return data; });
     let passengerIDs = [];
@@ -129,8 +133,8 @@ async function main(input){
     let avg = await Promise.all(resGetPassengers.passengerIDs.map(function (node) {
         return new Promise(async function (resolve, reject) {
 
-            // cfun require(@cloudant/cloudant as Cloudant,./utils.js as Utils,./config.js as Config) assign(area,passenger) vars(node) install(@cloudant/cloudant) deploy([{"name": "readGPSAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 30, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"}])
-            const passenger = await new Cloudant(Config.ibm_config).db.use('passenger').get(node);
+            // cfun require(@cloudant/cloudant as Cloudant,./utils.js as Utils,./config.js as Config) assign(area,passenger) vars(node,PASSENGER_DB) install(@cloudant/cloudant) deploy([{"name": "readGPSAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 30, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"}])
+            const passenger = await new Cloudant(Config.ibm_config).db.use(PASSENGER_DB).get(node);
             const passengerGPS = [];
             passengerGPS.push(Number(passenger.gpsLocation.split(", ")[0]));
             passengerGPS.push(Number(passenger.gpsLocation.split(", ")[1]));
