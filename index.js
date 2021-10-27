@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
 const readline = require('readline');
 const optionsDetector = require('./utils/options');
@@ -49,6 +51,8 @@ const getFilesInDirectory = function(directory, files) {
  * @returns {Promise<void>}
  */
 async function main(project) {
+
+    project = '.' + PATH_SEPARATOR + project;
 
     // Read all files in project root
     let files = getFilesInDirectory(project, []);
@@ -239,4 +243,8 @@ async function main(project) {
 }
 
 //main("./example")
-main(process.argv.slice(2)[0])
+if(process.argv.length < 3) {
+    console.log("Please specify a directory, e.g. \"example/\"");
+} else {
+    main(process.argv.slice(2)[0])
+}
