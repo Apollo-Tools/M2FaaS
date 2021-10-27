@@ -191,7 +191,7 @@ async function main(project) {
                         if(provider === PROVIDER_AWS){
                             aws.deploy(element, provider + "/" + functionName + PATH_SEPARATOR + PROVIDER_AWS + '.zip');
                         }else if (provider === PROVIDER_IBM){
-                            ibm.deploy(element, OUTPUT_DIRECTORY + "\\" + provider + "\\" + functionName + "\\" + PROVIDER_IBM + ".zip")
+                            //ibm.deploy(element, OUTPUT_DIRECTORY + "\\" + provider + "\\" + functionName + "\\" + PROVIDER_IBM + ".zip")
                         }
                     });
 

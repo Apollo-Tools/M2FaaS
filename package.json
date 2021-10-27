@@ -1,8 +1,8 @@
 {
   "name": "m2faas",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Monolith to FaaS",
-  "main": "main.js",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Apollo-Tools/m2faas.git"

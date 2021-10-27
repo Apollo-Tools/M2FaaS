@@ -7,9 +7,9 @@ Installed and configured ``AWS CLI`` and ``ÌBM CLI``.
 ## Install
 
 ````js
-npm i m2faas
+npm i m2faas -g
 ````
-
+      
 ## Usage
 
 #### 1. Add annotations to the monolith
@@ -26,14 +26,13 @@ Enclose your code block with annotations:
 
 
 ````
-TBA
+m2faas ./example/
 ````
 
 #### 3. Run the generated monolith
 
 ````
-cd out
-npm install
+cd out && npm install
 node your_code.js
 ````
 
@@ -91,24 +90,24 @@ The deployment configuration is represented as a json-array:
   {
     "name": "m2FaaSExampleAWS",                       
     "provider": "aws",                                
-    "region": "us-east-1",?                            
-    "memorySize": 128,?                                
-    "runtime": "nodejs14.x",?                          
-    "timeout": 3,?                                     
+    "region": "us-east-1",                           
+    "memorySize": 128,                           
+    "runtime": "nodejs14.x",                        
+    "timeout": 3,                                   
     "role": "arn:aws:iam::xxxxxxxxxxx:role/service-role/xxxxxxx"? 
   },
   {
     "name": "m2FaaSExampleIBM",                       
     "provider": "ibm",                                
-    "region": "eu-gb",? 
-    "memorySize": 128,? 
-    "runtime": "nodejs:12",? 
-    "timeout": 60?
+    "region": "eu-gb",
+    "memorySize": 128,
+    "runtime": "nodejs:12", 
+    "timeout": 60
   }
 ]
 ````
 
-``?`` represents an optional input. Otherwise default values will be used: TODO
+``region``, ``memorySize``, ``runtime``, ``timeout`` represents optional values. If no specified, default values will be used.
 
 ````js
 //cfun deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
@@ -124,32 +123,32 @@ The [example](example) monolithic project consists of three files:
 - [foo.js](example/foo.js) contains a a simple nodeJs function.
 - [example.js](example/example.js) is the starting point of the application:
 
+
+[example.js](example/example.js):
 ````js
 const foo = require('./foo')
 const _ = require('lodash')
 
 async function main(args) {
-    let a = 2;
+   let a = 2;
 
-    // cfun require(./foo.js as foo,lodash as _) assign(value,a,fooBefore) vars(a) install(lodash) deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
+    // cfun require(./foo.js as foo,lodash as _) assign(value,a,foo1) vars(a) install(lodash) deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
     await new Promise(resolve => setTimeout(resolve, 5000));
-    const fooBefore = foo.fun(a);
+    const foo1 = foo.fun(a);
     a = 43;
     const value = _.chunk(['a', 'b', 'c', 'd'], 2);
     // cfunend
 
-    return { a: a, value: value, foo_before: fooBefore, foo_after: foo.fun(a) }
+    return { a: a, value: value, foo1: foo1, foo2: foo.fun(a) }
 }
 
-main().then(response => {
-    console.log(response)
-});
+main().then(response => { console.log(response) });
 ````
 
 The annotated code has the following specialities:
 
-- The code block, which should be FaaSified, has two external dependencies: **./foo.js** represents a local dependency, while **lodash** represents an external dependency. 
-- After the FaaSification the variables **value**, **a** and **fooBefore** need to be available.
+- The code block, which should be FaaSified, has two external dependencies: **./foo.js** represents a local code dependency, while **lodash** represents an external package dependency. 
+- After the FaaSification the variables **value**, **a** and **foo1** need to be available.
 - The variable **a** is not declared in the code block and therefore an input to the cloud function.
 
 ----------
@@ -158,26 +157,27 @@ The tool generates a **foo.js** file to solve the local dependency and a **packa
 
 ##### AWS Lambda Function
 
-Starting point of the lambda function:
+The generated lambda function:
 
 ```js
 const foo = require("./foo.js")
 const _ = require("lodash")
 
 exports.handler = async (event) => {
-    let a = event.a
+  let a = event.a
 
-    // cfun require(./foo.js as foo,lodash as _) assign(value,a,fooBefore) vars(a) install(lodash) deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
-    await new Promise((resolve) => setTimeout(resolve, 5000))
-    const fooBefore = foo.fun(a)
-    a = 43
-    const value = _.chunk(["a", "b", "c", "d"], 2)
+  // cfun require(./foo.js as foo,lodash as _) assign(value,a,fooBefore) vars(a) install(lodash) deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
+  await new Promise((resolve) => setTimeout(resolve, 5000))
+  const foo1 = foo.fun(a)
+  a = 43
+  const value = _.chunk(["a", "b", "c", "d"], 2)
 
-    return (response = {
-        statusCode: 200,
-        body: { value: value, a: a, fooBefore: fooBefore },
-    })
+  return (response = {
+    statusCode: 200,
+    body: { value: value, a: a, fooBefore: fooBefore },
+  })
 }
+
 ```
 
 ##### IBM Cloud Function
@@ -189,15 +189,15 @@ const foo = require("./foo.js")
 const _ = require("lodash")
 
 async function main(event) {
-    let a = event.a
+  let a = event.a
 
-    // cfun require(./foo.js as foo,lodash as _) assign(value,a,fooBefore) vars(a) install(lodash) deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
-    await new Promise((resolve) => setTimeout(resolve, 5000))
-    const fooBefore = foo.fun(a)
-    a = 43
-    const value = _.chunk(["a", "b", "c", "d"], 2)
+  // cfun require(./foo.js as foo,lodash as _) assign(value,a,foo1) vars(a) install(lodash) deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
+  await new Promise((resolve) => setTimeout(resolve, 5000))
+  const foo1 = foo.fun(a)
+  a = 43
+  const value = _.chunk(["a", "b", "c", "d"], 2)
 
-    return { value: value, a: a, fooBefore: fooBefore }
+  return { value: value, a: a, foo1: foo1 }
 }
 exports.main = main
 ```
@@ -211,26 +211,23 @@ const foo = require('./foo')
 const _ = require('lodash')
 
 async function main(args) {
-    let a = 2;
+   let a = 2;
 
-    // cfun name(m2faasExample) require(./foo.js as foo,lodash as _) assign(value,a,fooBefore) vars(a) install(lodash) deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
-    /*
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        const fooBefore = foo.fun(a);
-        a = 43;
-        const value = _.chunk(['a', 'b', 'c', 'd'], 2);
-     */
+    // cfun require(./foo.js as foo,lodash as _) assign(value,a,foo1) vars(a) install(lodash) deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
+    /* await new Promise(resolve => setTimeout(resolve, 5000));
+    const foo1 = foo.fun(a);
+    a = 43;
+    const value = _.chunk(['a', 'b', 'c', 'd'], 2); */
     // cfunend
-    let m2FaaSExampleIBMSolution = await require('./m2faaSInvoker').invoke({ a: a, },  [{"name":"m2FaaSExampleAWS","provider":"aws","region":"us-east-1"},{"name":"m2FaaSExampleIBM","provider":"ibm","region":"eu-gb"}]);
-    value = m2FaaSExampleIBMSolution.value
-    a = m2FaaSExampleIBMSolution.a
-    fooBefore = m2FaaSExampleIBMSolution.fooBefore
+    
+    let m2FaaSExampleIBMResult = await require('./m2faaSInvoker').invoke({ a: a,  }, [{"name":"m2FaaSExampleAWS","provider":"aws","region":"us-east-1"},{"name":"m2FaaSExampleIBM","provider":"ibm","region":"eu-gb"}]);
+    value = m2FaaSExampleIBMResult.value
+    a = m2FaaSExampleIBMResult.a
+    foo1 = m2FaaSExampleIBMResult.foo1
 
-
-    return { a: a, value: value, foo_before: fooBefore, foo_after: foo.fun(a) }
+    return { a: a, value: value, foo1: foo1, foo2: foo.fun(a) }
 }
 
-main().then(response => {
-    console.log(response)
-});
+main().then(response => { console.log(response) });
+
 ```
