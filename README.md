@@ -94,7 +94,7 @@ The deployment configuration is represented as a json-array:
     "memorySize": 128,                           
     "runtime": "nodejs14.x",                        
     "timeout": 3,                                   
-    "role": "arn:aws:iam::xxxxxxxxxxx:role/service-role/xxxxxxx"? 
+    "role": "arn:aws:iam::xxxxxxxxxxx:role/service-role/xxxxxxx"
   },
   {
     "name": "m2FaaSExampleIBM",                       
