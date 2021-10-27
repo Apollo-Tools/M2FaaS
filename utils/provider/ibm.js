@@ -35,10 +35,10 @@ module.exports = {
 
         // Deploy new ibm cloud action
         var child_process = require('child_process');
-        child_process.execSync('ibmcloud target -r ' + (deployment.region !== undefined ? deployment.region : 'eu-gb'));
+        child_process.execSync('ibmcloud target -r ' + (deployment.region !== undefined ? deployment.region : deployment.region));
 
         try {
-            child_process.execSync('ibmcloud fn action create ' + deployment.name + ' out\\ibm\\ibm.zip --kind ' + (deployment.runtime !== undefined ? deployment.runtime : 'nodejs:12') + " --memory " + (deployment.memorySize !== undefined ? deployment.memorySize : 128) + " --timeout " + ((deployment.timeout !== undefined ? deployment.timeout : 60) * 1000));
+            child_process.execSync('ibmcloud fn action create ' + deployment.name + ' out\\ibm\\' + deployment.name +  '\\ibm.zip --kind ' + (deployment.runtime !== undefined ? deployment.runtime : 'nodejs:12') + " --memory " + (deployment.memorySize !== undefined ? deployment.memorySize : 128) + " --timeout " + ((deployment.timeout !== undefined ? deployment.timeout : 60) * 1000));
         } catch (e) {
             module.exports.update(deployment);
         }
@@ -52,6 +52,6 @@ module.exports = {
 
         // Reconfigure ibm cloud action
         var child_process = require('child_process');
-        child_process.execSync('ibmcloud fn action update ' + deployment.name + ' out\\ibm\\ibm.zip --kind ' + (deployment.runtime !== undefined ? deployment.runtime : 'nodejs:12') + " --memory " + (deployment.memorySize !== undefined ? deployment.memorySize : 128) + " --timeout " + ((deployment.timeout !== undefined ? deployment.timeout : 60) * 1000));
+        child_process.execSync('ibmcloud fn action update ' + deployment.name + ' out\\ibm\\' + deployment.name +  '\\ibm.zip --kind ' + (deployment.runtime !== undefined ? deployment.runtime : 'nodejs:12') + " --memory " + (deployment.memorySize !== undefined ? deployment.memorySize : 128) + " --timeout " + ((deployment.timeout !== undefined ? deployment.timeout : 60) * 1000));
     }
 }

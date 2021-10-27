@@ -37,8 +37,6 @@ module.exports = {
      * @returns {{install: *, name: *, require: *, vars: *, assign: *}} json object
      */
     getOptions: function(optionsString) {
-        console.log(optionsString.match('deploy[ \t]*\\([^\\)]+\\)')[0].split('(').pop().split(')')[0])
-        console.log(JSON.parse('[{"result":true, "count":42}]'))
         return options = {
             require: parseByOption(optionsString, "require"),
             install: parseByOption(optionsString, "install"),

@@ -1,6 +1,3 @@
-/**
- * External dependencies.
- */
 const awsSDK = require('aws-sdk');
 const fs = require('fs');
 const prettier = require('prettier')

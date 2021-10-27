@@ -8,7 +8,7 @@ module.exports = {
      */
     packageGen: function(name, dependencies) {
 
-        /// Write package.json file
+        // Write package.json file
         return JSON.stringify({
                 "name": name,
                 "version": "0.0.1",

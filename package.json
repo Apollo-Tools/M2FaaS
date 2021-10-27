@@ -16,6 +16,8 @@
   "dependencies": {
     "adm-zip": "^0.4.16",
     "aws-sdk": "latest",
+    "m2FaaSExampleAWS": "file:out/aws/m2FaaSExampleAWS",
+    "m2FaaSExampleIBM": "file:out/ibm/m2FaaSExampleIBM",
     "prettier": "^2.0.5",
     "tmp": "^0.2.1",
     "webpack": "^4.0.0"

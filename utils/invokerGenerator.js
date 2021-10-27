@@ -9,20 +9,17 @@ module.exports = {
             "        const refs = new Map();\n" +
             "        const parents = [];\n" +
             "        const path = [\"this\"];\n" +
-            "\n" +
             "        try {\n" +
             "            parents.push(obj);\n" +
             "            return JSON.stringify(obj, checkCircular, space);\n" +
             "        } finally {\n" +
             "            clear();\n" +
             "        }\n" +
-            "\n" +
             "        function clear() {\n" +
             "            refs.clear();\n" +
             "            parents.length = 0;\n" +
             "            path.length = 1;\n" +
             "        }\n" +
-            "\n" +
             "        function updateParents(key, value) {\n" +
             "            var idx = parents.length - 1;\n" +
             "            var prev = parents[idx];\n" +
@@ -44,12 +41,10 @@ module.exports = {
             "                }\n" +
             "            }\n" +
             "        }\n" +
-            "\n" +
             "        function checkCircular(key, value) {\n" +
             "            if (value != null) {\n" +
             "                if (typeof value === \"object\") {\n" +
             "                    if (key) { updateParents(key, value); }\n" +
-            "\n" +
             "                    let other = refs.get(value);\n" +
             "                    if (other) {\n" +
             "                        return '[Circular Reference]' + other;\n" +
@@ -75,7 +70,6 @@ module.exports = {
             "                    .Lambda({ accessKeyId: credentialsAmazon.accessKeyId, secretAccessKey: credentialsAmazon.secretAccessKey, region: element.region }))\n" +
             "                    .invoke({ FunctionName: element.name, Payload: JSON.stringify(JSON.parse(module.exports.stringifyWithCircularRefs(input)))})\n" +
             "                    .promise().then(p => p.Payload));\n" +
-            "               console.log(\": Req took \" + (Date.now()-start) + \"ms\")\n" +
             "            }else if(element.provider === 'ibm'){\n" +
             "                solution = await new Promise(async (resolve, reject) => {\n" +
             "                    try {\n" +
@@ -85,7 +79,6 @@ module.exports = {
             "                });\n" +
             "                solution = solution.response.result;\n" +
             "            }}catch (e){solution.error = e;}\n" +
-            "            console.log(\": Solution=\" + JSON.stringify(solution))\n" +
             "            if(!solution.hasOwnProperty('errorMessage') && !solution.hasOwnProperty('error')){\n" +
             "                if(element.provider === 'aws' && solution.hasOwnProperty('body')){\n" +
             "                    return solution.body;\n" +

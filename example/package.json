@@ -2,11 +2,11 @@
   "name": "example",
   "version": "1.0.0",
   "description": "Example for M2FaaS",
-  "main": "simpleFunction.js",
+  "main": "example.js",
   "author": "Stefan Pedratscher",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "latest",
-    "lodash": "^4.17.21"
+    "lodash": "latest"
   }
 }

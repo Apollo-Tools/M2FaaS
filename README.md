@@ -10,21 +10,24 @@ TBA
 
 ## Usage
 
-### 1. Add annotations to the monolith
+#### 1. Add annotations to the monolith
 
 Enclose your code block with annotations:
 
 ````js
 //cfun ...
-...
+    <code_block>
 //cfunend
 ````
 
-### 2. Run M2FaaS
+#### 2. Run M2FaaS
 
+
+````
 TBA
+````
 
-### 3. Run the generated monolith
+#### 3. Run the generated monolith
 
 ````
 cd out
@@ -49,7 +52,7 @@ const value = _.chunk(['a', 'b', 'c', 'd'], 2);
 
 ````js
 //cfun install(lodash)
-...
+const value = _.chunk(['a', 'b', 'c', 'd'], 2);
 // cfunend
 ````
 
