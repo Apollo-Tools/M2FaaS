@@ -6,7 +6,9 @@ Installed and configured ``AWS CLI`` and ``ÌBM CLI``.
 
 ## Install
 
-TBA
+````js
+npm i m2faas
+````
 
 ## Usage
 
