@@ -26,7 +26,7 @@ Enclose your code block with annotations:
 
 
 ````
-m2faas ./example/
+m2faas example/
 ````
 
 #### 3. Run the generated monolith
