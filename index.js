@@ -52,7 +52,7 @@ const getFilesInDirectory = function(directory, files) {
  */
 async function main(project) {
 
-    project = '.' + PATH_SEPARATOR + project;
+    project = project.startsWith("." + PATH_SEPARATOR) ? project : '.' + PATH_SEPARATOR + project;
 
     // Read all files in project root
     let files = getFilesInDirectory(project, []);
