@@ -1,6 +1,6 @@
 {
   "name": "m2faas",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Monolith to FaaS",
   "main": "index.js",
   "bin": "index.js",
