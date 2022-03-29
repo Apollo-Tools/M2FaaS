@@ -75,18 +75,18 @@ module.exports = {
             "                    try {\n" +
             "                        const credentials = require('./credentials');\n" +
             "                        resolve(JSON.parse(require('child_process').execSync('curl -u ' + credentials.api_key + ' -X POST ' + credentials.api + '' + element.name + '?blocking=true -H \"Content-Type: application/json\" -d \\'' + JSON.stringify(JSON.parse(module.exports.stringifyWithCircularRefs(input))) + '\\'')))\n" +
-            "                    } catch(error) {}\n" +
+            "                    } catch(error) {resolve('error')}\n" +
             "                });\n" +
             "                solution = solution.response.result;\n" +
             "            }}catch (e){solution.error = e;}\n" +
-            "            if(!solution.hasOwnProperty('errorMessage') && !solution.hasOwnProperty('error')){\n" +
+            "            if(!solution.hasOwnProperty('errorMessage') && !solution.hasOwnProperty('error') && solution != 'error'){\n" +
             "                if(element.provider === 'aws' && solution.hasOwnProperty('body')){\n" +
             "                    return solution.body;\n" +
             "                }\n" +
             "                return solution;\n" +
             "            }\n" +
             "        }\n" +
-            "        return null;\n" +
+            "        throw new Error('Could not invoke serverless functions');\n" +
             "    }\n" +
             "}";
     }
