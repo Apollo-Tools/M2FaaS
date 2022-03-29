@@ -223,7 +223,19 @@ async function main(args) {
     const value = _.chunk(['a', 'b', 'c', 'd'], 2); */
     // cfunend
     
-    let m2FaaSExampleIBMResult = await require('./m2faaSInvoker').invoke({ a: a,  }, [{"name":"m2FaaSExampleAWS","provider":"aws","region":"us-east-1"},{"name":"m2FaaSExampleIBM","provider":"ibm","region":"eu-gb"}]);
+    try {
+        m2FaaSExampleIBMResult = await require('./m2faaSInvoker').invoke({ a: a,  }, [{"name":"m2FaaSExampleAWS","provider":"aws","region":"us-east-1"},{"name":"m2FaaSExampleIBM","provider":"ibm","region":"eu-gb"}]);
+    } catch (e) {
+        m2FaaSExampleIBMResult = await async function() {     // cfun require(./foo.js as foo,lodash as _) assign(value,a,foo1) vars(a) install(lodash) deploy([{"name": "m2FaaSExampleAWS", "provider": "aws", "region": "us-east-1", "memorySize": 128, "runtime": "nodejs14.x", "timeout": 3, "role": "arn:aws:iam::170392512081:role/service-role/getFlight-role-n1g2o34s"},{"name": "m2FaaSExampleIBM", "provider": "ibm", "region": "eu-gb", "memorySize": 128, "runtime": "nodejs:12", "timeout": 60 }])
+            
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            const foo1 = foo.fun(a);
+            a = 43;
+            const value = _.chunk(['a', 'b', 'c', 'd'], 2);
+            
+            return { value: value, a: a, foo1: foo1,  } 
+         }(); 
+    } 
     value = m2FaaSExampleIBMResult.value
     a = m2FaaSExampleIBMResult.a
     foo1 = m2FaaSExampleIBMResult.foo1

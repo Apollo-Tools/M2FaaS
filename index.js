@@ -211,7 +211,7 @@ async function main(project) {
                     fileContent[lineNumber - 1] += " */";
 
                     // Add serverless function call to the monolith
-                    fileContent[lineNumber] +=  "\ntry {\n let " + functionName + "Result = await require('./m2faaSInvoker').invoke(" + jsonInput + ", " +
+                    fileContent[lineNumber] +=  "\ntry {\n " + functionName + "Result = await require('./m2faaSInvoker').invoke(" + jsonInput + ", " +
                         JSON.stringify(toInvoke) + "); \n} catch (e) {\n m2FaaSExampleIBMResult = await async function() { " + codeBlock + " return " + returnJsonString + " }(); \n} \n" + funcReturn
 
                     funcReturn = ''
